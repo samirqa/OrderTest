@@ -3,7 +3,6 @@ package ExchangeOrder.test;
 
 import org.testng.ITestResult;
 import org.testng.annotations.AfterMethod;
-import org.testng.annotations.AfterTest;
 import org.testng.annotations.Test;
 
 import com.aventstack.extentreports.Status;
