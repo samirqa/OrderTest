@@ -2,41 +2,63 @@ package ExchangeOrder.utility;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.websocket.ClientEndpoint;
+import javax.websocket.CloseReason;
 import javax.websocket.ContainerProvider;
-import javax.websocket.DeploymentException;
+import javax.websocket.OnClose;
 import javax.websocket.OnMessage;
+import javax.websocket.OnOpen;
 import javax.websocket.Session;
 import javax.websocket.WebSocketContainer;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import ExchangeOrder.model.LogResult;
-import ExchangeOrder.model.OrderLogBack;
 
 @ClientEndpoint
 public class WsClient {
-    private static String server_url = ApplicationProperties.getInstance().getProperty("server.endpoint");
-    private static ObjectMapper mapper = new ObjectMapper();
-    public static List<OrderLogBack> logs;
+    Session userSession = null;
+    private MessageHandler messageHandler;
+    private static String endpointURI = ApplicationProperties.getInstance().getProperty("server.endpoint");
 
-    @OnMessage
-    public void onMessage(String message) throws JsonParseException, JsonMappingException, IOException {
-       System.out.println("Received msg: "+message);
-       LogResult res = mapper.readValue(message, LogResult.class);
-       logs.add(res.getResult());
+    public WsClient(String query) {
+        try {
+            WebSocketContainer container = ContainerProvider
+                    .getWebSocketContainer();
+            container.connectToServer(this, new URI(endpointURI+query));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
     
-    public static void connectToSocket(String query) throws DeploymentException, IOException {
-        WebSocketContainer container=null;
-        Session session=null;
-    	container = ContainerProvider.getWebSocketContainer();
-    	session = container.connectToServer(WsClient.class, URI.create(server_url+query));
-    	logs = new ArrayList<OrderLogBack>();
+    public void close() throws IOException {
+    	userSession.close();
+    }
+
+    @OnOpen
+    public void onOpen(Session userSession) {
+        this.userSession = userSession;
+    }
+
+    @OnClose
+    public void onClose(Session userSession, CloseReason reason) {
+        this.userSession = null;
+    }
+
+    @OnMessage
+    public void onMessage(String message) {
+        if (this.messageHandler != null)
+            this.messageHandler.handleMessage(message);
+    }
+
+    public void addMessageHandler(MessageHandler msgHandler) {
+        this.messageHandler = msgHandler;
+    }
+
+    public void sendMessage(String message) {
+        this.userSession.getAsyncRemote().sendText(message);
+    }
+
+    public static interface MessageHandler {
+        public void handleMessage(String message);
     }
 }
+  

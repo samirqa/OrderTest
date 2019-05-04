@@ -8,7 +8,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 @JsonIgnoreProperties(ignoreUnknown=true)
-public class OrderLogBack  {
+public class OrderLogBack implements Comparable<OrderLogBack> {
 	private long index_id;
 	private String memberId;
 	private String orderId;
@@ -248,6 +248,18 @@ public class OrderLogBack  {
 				+ globalMatchingEngineLogId + ", partitionId=" + partitionId + ", partitionOffset=" + partitionOffset
 				+ "]";
 	}
+	public int compareTo(OrderLogBack arg0) {
+		// TODO Auto-generated method stub
+		return this.globalMatchingEngineLogId.compareTo(arg0.globalMatchingEngineLogId);
+	}
 	
+	@Override
+	public boolean equals(Object obj) {
+		// TODO Auto-generated method stub
+		if(obj instanceof OrderLogBack) {
+			return this.globalMatchingEngineLogId.equals(((OrderLogBack)obj).globalMatchingEngineLogId); 
+		}
+		return super.equals(obj);
+	}
 		
 }
