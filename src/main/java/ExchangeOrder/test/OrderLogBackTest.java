@@ -34,27 +34,28 @@ public class OrderLogBackTest extends Base {
 	final ObjectMapper mapper = new ObjectMapper();
 	boolean messageReceived=false;
 	//Step 2 - pass all parameter empty  
-	@Test
-	public void Test_invalidOrderLogBack_AllInvalid() throws Exception {
+	@Test(priority=1)
+	public void Test_EmptyAllInput() throws Exception {
 		try {
 			Log.info("-------Start TestCase" + sTestCaseName + "----------");
-			logger = extent.createTest("Test_invalidOrderLogBack_AllInvalid");
+			logger = extent.createTest("Test_EmptyAllInput");
 			WsClient cl = new WsClient("xchange/orderstreaming/orderlogback?memberId=&consumerId=&lastOrderLogId=");
 			cl.addMessageHandler(new MessageHandler() {
 				
 				public void handleMessage(String message) {
 					try {
-						assertEquals(message, "{\n" + 
-								"  \"error\" : {\n" + 
-								"    \"code\" : 100,\n" + 
-								"    \"message\" : \"ConsumerId must be a non empty value!!\"\n" + 
-								"  }\n" + 
+						assertEquals(message, "{\r\n" + 
+								"  \"error\" : {\r\n" + 
+								"    \"code\" : 100,\r\n" + 
+								"    \"message\" : \"MemberID must be a non empty value!!\"\r\n" + 
+								"  }\r\n" + 
 								"}");
-						logger.info(message);
+						logger.info("Display error message of Empty member ID is :"+message+ " Successfully");
 						messageReceived=true;
-						logger.log(Status.PASS, MarkupHelper.createLabel("Test_invalidOrderLogBack_AllInvalid", ExtentColor.GREEN));
+						logger.log(Status.PASS, MarkupHelper.createLabel("Test_EmptyAllInput", ExtentColor.GREEN));
 						
 					}catch (Exception e) {
+						e.printStackTrace();
 					}
 				}
 			});
@@ -62,33 +63,34 @@ public class OrderLogBackTest extends Base {
 			Thread.sleep(1000);
 			assertEquals(messageReceived,true);
 		}catch (Exception e) {
-			logger.log(Status.FAIL, MarkupHelper.createLabel("Test_invalidOrderLogBack", ExtentColor.RED));
+			logger.log(Status.FAIL, MarkupHelper.createLabel("Test_EmptyAllInput", ExtentColor.RED));
 		}
 			
 	}
 
 	//Step 3 - invalid memberid and valid consumer with valid lastLogid  
-	@Test
-	public void Test_invalidOrderLogBack_InvalidMedmberID() throws Exception {
+	@Test(priority=2)
+	public void Test_InvalidMemberID() throws Exception {
 		try {
 			Log.info("-------Start TestCase" + sTestCaseName + "----------");
-			logger = extent.createTest("Test_invalidOrderLogBack");
+			logger = extent.createTest("Test_InvalidMemberID");
 			WsClient cl = new WsClient("xchange/orderstreaming/orderlogback?memberId=Z&consumerId=TesConsumer&lastOrderLogId=");
 			cl.addMessageHandler(new MessageHandler() {
 				
 				public void handleMessage(String message) {
 					try {
-						assertEquals(message, "{\n" + 
-								"  \"error\" : {\n" + 
-								"    \"code\" : 100,\n" + 
-								"    \"message\" : \"Member id is not Valid and this connection should be rejected\"\n" + 
-								"  }\n" + 
+						assertEquals(message, "{\r\n" + 
+								"  \"error\" : {\r\n" + 
+								"    \"code\" : 100,\r\n" + 
+								"    \"message\" : \"Member id is not Valid and this connection should be rejected\"\r\n" + 
+								"  }\r\n" + 
 								"}");
-						logger.info(message);
+						logger.info("Display error message of Invalid member ID is :"+message+ " Successfully");
 						messageReceived = true;
-						logger.log(Status.PASS, MarkupHelper.createLabel("Test_invalidOrderLogBack_InvalidMedmberID ", ExtentColor.GREEN));
+						logger.log(Status.PASS, MarkupHelper.createLabel("Test_InvalidMemberID ", ExtentColor.GREEN));
 						
 					}catch (Exception e) {
+						e.printStackTrace();
 					}
 				}
 			});
@@ -96,33 +98,34 @@ public class OrderLogBackTest extends Base {
 			Thread.sleep(1000);
 			assertEquals(messageReceived,true);
 		}catch (Exception e) {
-			logger.log(Status.FAIL, MarkupHelper.createLabel("Test_invalidOrderLogBack", ExtentColor.RED));
+			logger.log(Status.FAIL, MarkupHelper.createLabel("Test_InvalidMemberID", ExtentColor.RED));
 		}
 			
 	}
 
 	//Step 4 - valid memberid, empty consumerId, and empty orderLogbackid  
-	@Test
-	public void Test_invalidOrderLogBack_AllValid() throws Exception {
+	@Test(priority=3)
+	public void Test_EmptyConsumerID() throws Exception {
 		try {
 			Log.info("-------Start TestCase" + sTestCaseName + "----------");
-			logger = extent.createTest("Test_invalidOrderLogBack");
+			logger = extent.createTest("Test_EmptyConsumerID");
 			WsClient cl = new WsClient("xchange/orderstreaming/orderlogback?memberId=A&consumerId=&lastOrderLogId=");
 			cl.addMessageHandler(new MessageHandler() {
 				
 				public void handleMessage(String message) {
 					try {
-						assertEquals(message, "{\n" + 
-								"  \"error\" : {\n" + 
-								"    \"code\" : 100,\n" + 
-								"    \"message\" : \"ConsumerId must be a non empty value!!\"\n" + 
-								"  }\n" + 
+						assertEquals(message, "{\r\n" + 
+								"  \"error\" : {\r\n" + 
+								"    \"code\" : 100,\r\n" + 
+								"    \"message\" : \"ConsumerId must be a non empty value!!\"\r\n" + 
+								"  }\r\n" + 
 								"}");
 						messageReceived=true;
-						logger.info(message);
-						logger.log(Status.PASS, MarkupHelper.createLabel("Test_invalidOrderLogBack_InvalidMedmberID ", ExtentColor.GREEN));
+						logger.info("Display error message of Empty Conlumer ID is :"+message+ " Successfully");
+						logger.log(Status.PASS, MarkupHelper.createLabel("Test_EmptyConsumerID ", ExtentColor.GREEN));
 						
 					}catch (Exception e) {
+						e.printStackTrace();
 					}
 				}
 			});
@@ -131,18 +134,18 @@ public class OrderLogBackTest extends Base {
 			Thread.sleep(1000);
 			assertEquals(messageReceived,true);
 		}catch (Exception e) {
-			logger.log(Status.FAIL, MarkupHelper.createLabel("Test_invalidOrderLogBack", ExtentColor.RED));
+			logger.log(Status.FAIL, MarkupHelper.createLabel("Test_EmptyConsumerID", ExtentColor.RED));
 		}
 			
 	}
 
-	//Step 5. Provid valid data, with blanck ordlerLogId
-	@Test
-	public void Test_SingleConfirmLastOrderLog_ValidData() throws Exception {
+	//Step 5. Provid valid data, with blank ordlerLogId
+	@Test(priority=4)
+	public void Test_ValidData() throws Exception {
 		try {
 		Log.info("-------Start TestCase" + sTestCaseName + "----------");
-		logger = extent.createTest("Test_SingleConfirmLastOrderLogTest");
-		logger.log(Status.PASS, MarkupHelper.createLabel("Test_SingleConfirmLastOrderLogTest ", ExtentColor.GREEN));
+		logger = extent.createTest("Test_ValidData");
+		//logger.log(Status.PASS, MarkupHelper.createLabel("Test_ValidData ", ExtentColor.GREEN));
 		WsClient cl = new WsClient("xchange/orderstreaming/orderlogback?memberId=A&consumerId=testConsumer&lastOrderLogId=");
 		
 		cl.addMessageHandler(new MessageHandler() {
@@ -150,11 +153,10 @@ public class OrderLogBackTest extends Base {
 			public void handleMessage(String message) {
 				try {
 				LogResult result =  mapper.readValue(message, LogResult.class);
-				logger.log(Status.PASS, message);
-				Log.info(message);
-				System.out.println(message);
+				logger.info("Display All messages of valid data :"+message+ " Successfully");
 				olbList.add(result.getResult());
 				}catch (Exception e) {
+					e.printStackTrace();
 				}
 			}
 		});
@@ -162,33 +164,33 @@ public class OrderLogBackTest extends Base {
 		Thread.sleep(2000);
 		
 		assertEquals(olbList.size(), 28);
+		logger.info("Matched all display data counnt :"+olbList.size()+ "Successfully");
 		assertEquals(olbList, loadExpectedResults());
 		cl.close();
-		Log.info("Test_SingleConfirmLastOrderLogTest() : PASS");
+		logger.log(Status.PASS, MarkupHelper.createLabel("Test_ValidData ", ExtentColor.GREEN));
 		}catch (Exception e) {
-			logger.log(Status.FAIL, MarkupHelper.createLabel("Test_SingleConfirmLastOrderLogTest", ExtentColor.RED));
-			Log.error("Test_OrderbackLogValidation() : FAIL");
-			Log.error(e.getMessage());
-			throw (e);
+			logger.log(Status.FAIL, MarkupHelper.createLabel("Test_ValidData", ExtentColor.RED));
 		}		
 	}
 	
 	//Step 6. Provider valid memberid and duplicate consumer
-	@Test
-	public void Test_SingleConfirmLastOrderLog_DuplicateConsumer() throws Exception {
+	@Test(priority=5)
+	public void Test_DuplicateConsumerID() throws Exception {
+		try {
 		Log.info("-------Start TestCase" + sTestCaseName + "----------");
-		logger = extent.createTest("Test_invalidOrderLogBack");
+		logger = extent.createTest("Test_DuplicateConsumerID");
 		WsClient cl = new WsClient("xchange/orderstreaming/orderlogback?memberId=A&consumerId=TestConsumer1&lastOrderLogId=_");
 		cl.addMessageHandler(new MessageHandler() {
 			
 			public void handleMessage(String message) {
 				try {
 				LogResult result =  mapper.readValue(message, LogResult.class);
-				logger.log(Status.PASS, message);
+				logger.log(Status.INFO, message);
 				Log.info(message);
 				System.out.println(message);
 				olbList.add(result.getResult());
 				}catch (Exception e) {
+					e.printStackTrace();
 				}
 			}
 		});
@@ -198,22 +200,26 @@ public class OrderLogBackTest extends Base {
 			
 			public void handleMessage(String message) {
 				try {
-					assertEquals(message, "{\n" + 
-							"  \"error\" : {\n" + 
-							"    \"code\" : 100,\n" + 
-							"    \"message\" : \"consumer already part of the queue and this connection should be rejected\"\n" + 
-							"  }\n" + 
+					assertEquals(message, "{\r\n" + 
+							"  \"error\" : {\r\n" + 
+							"    \"code\" : 100,\r\n" + 
+							"    \"message\" : \"consumer already part of the queue and this connection should be rejected\"\r\n" + 
+							"  }\r\n" + 
 							"}");
-					logger.info(message);
+					logger.info("Display messages of duplicate  consumer ID :"+ message + " Successfully");
 					messageReceived=true;
-					logger.log(Status.PASS, MarkupHelper.createLabel("Test_invalidOrderLogBack_InvalidMedmberID ", ExtentColor.GREEN));
+					logger.log(Status.PASS, MarkupHelper.createLabel("Test_DuplicateConsumerID ", ExtentColor.GREEN));
 				}catch (Exception e) {
+					e.printStackTrace();
 				}
 			}
 		});
 		
 		Thread.sleep(1000);
 		assertEquals(messageReceived,true);
+		}catch (Exception e) {
+			logger.log(Status.FAIL, MarkupHelper.createLabel("Test_DuplicateConsumerID", ExtentColor.RED));
+		}	
 	}
 	
 	
@@ -224,36 +230,6 @@ public class OrderLogBackTest extends Base {
 		List<OrderLogBack> olbList = mapper.readValue(in, new TypeReference<List<OrderLogBack>>() {
 														});
 		return olbList;
-	}
-
-	@Test
-	public void Test_OrderbackLogValidation() throws Exception {
-		try {
-		Log.info("-------Start TestCase" + sTestCaseName + "----------");
-		logger = extent.createTest("Test OrderaBackLogValidation");
-		logger.log(Status.PASS, MarkupHelper.createLabel("Test_OrderbackLogValidation ", ExtentColor.GREEN));
-		Log.info("Test_OrderbackLogValidation() : PASS");
-		}catch (Exception e) {
-			logger.log(Status.FAIL, MarkupHelper.createLabel("Test_OrderbackLogValidation", ExtentColor.RED));
-			Log.error("Test_OrderbackLogValidation() : FAIL");
-			Log.error(e.getMessage());
-			throw (e);
-		}
-	}
-
-	@Test
-	public void Test_OrderbackLogInvalidInput() throws Exception {
-		try {
-		Log.info("-------Start TestCase" + sTestCaseName + "----------");
-		logger = extent.createTest("Test InvalidInput OrderBackLog");
-			logger.log(Status.PASS, MarkupHelper.createLabel("Test_OrderbackLogInvalidInput ", ExtentColor.GREEN));
-			Log.info("Test_OrderbackLogInvalidInput() : PASS");
-		} catch (Exception e) {
-			logger.log(Status.FAIL, MarkupHelper.createLabel("Test_OrderbackLogInvalidInput", ExtentColor.RED));
-			Log.error("Test_OrderbackLogInvalidInput() : FAIL");
-			Log.error(e.getMessage());
-			throw (e);
-		}
 	}
 
 	@AfterMethod
