@@ -13,6 +13,7 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.Test;
 
+import com.alibaba.fastjson.JSON;
 import com.aventstack.extentreports.Status;
 import com.aventstack.extentreports.markuputils.ExtentColor;
 import com.aventstack.extentreports.markuputils.MarkupHelper;
@@ -44,12 +45,8 @@ public class OrderLogBackTest extends Base {
 				
 				public void handleMessage(String message) {
 					try {
-						assertEquals(message, "{\r\n" + 
-								"  \"error\" : {\r\n" + 
-								"    \"code\" : 100,\r\n" + 
-								"    \"message\" : \"MemberID must be a non empty value!!\"\r\n" + 
-								"  }\r\n" + 
-								"}");
+						String expected = "{\"error\":{\"code\":100,\"message\":\"ConsumerId must be a non empty value!!\"}}";
+						assertEquals(JSON.parse(message), JSON.parse(expected));
 						logger.info("Display error message of Empty member ID is :"+message+ " Successfully");
 						messageReceived=true;
 						logger.log(Status.PASS, MarkupHelper.createLabel("Test_EmptyAllInput", ExtentColor.GREEN));
@@ -59,7 +56,7 @@ public class OrderLogBackTest extends Base {
 					}
 				}
 			});
-			
+			Log.info("Wait for error message to be received.");
 			Thread.sleep(1000);
 			assertEquals(messageReceived,true);
 		}catch (Exception e) {
@@ -79,12 +76,14 @@ public class OrderLogBackTest extends Base {
 				
 				public void handleMessage(String message) {
 					try {
-						assertEquals(message, "{\r\n" + 
+						String expected = "{\r\n" + 
 								"  \"error\" : {\r\n" + 
 								"    \"code\" : 100,\r\n" + 
 								"    \"message\" : \"Member id is not Valid and this connection should be rejected\"\r\n" + 
 								"  }\r\n" + 
-								"}");
+								"}";
+								
+						assertEquals(JSON.parse(message), JSON.parse(expected));
 						logger.info("Display error message of Invalid member ID is :"+message+ " Successfully");
 						messageReceived = true;
 						logger.log(Status.PASS, MarkupHelper.createLabel("Test_InvalidMemberID ", ExtentColor.GREEN));
@@ -94,7 +93,7 @@ public class OrderLogBackTest extends Base {
 					}
 				}
 			});
-			
+			Log.info("Wait for error message to be received.");
 			Thread.sleep(1000);
 			assertEquals(messageReceived,true);
 		}catch (Exception e) {
@@ -114,12 +113,13 @@ public class OrderLogBackTest extends Base {
 				
 				public void handleMessage(String message) {
 					try {
-						assertEquals(message, "{\r\n" + 
+						String expected = "{\r\n" + 
 								"  \"error\" : {\r\n" + 
 								"    \"code\" : 100,\r\n" + 
 								"    \"message\" : \"ConsumerId must be a non empty value!!\"\r\n" + 
 								"  }\r\n" + 
-								"}");
+								"}";
+						assertEquals(JSON.parse(message), JSON.parse(expected));
 						messageReceived=true;
 						logger.info("Display error message of Empty Conlumer ID is :"+message+ " Successfully");
 						logger.log(Status.PASS, MarkupHelper.createLabel("Test_EmptyConsumerID ", ExtentColor.GREEN));
@@ -129,8 +129,8 @@ public class OrderLogBackTest extends Base {
 					}
 				}
 			});
-		
 
+			Log.info("Wait for error message to be received.");
 			Thread.sleep(1000);
 			assertEquals(messageReceived,true);
 		}catch (Exception e) {
@@ -200,12 +200,13 @@ public class OrderLogBackTest extends Base {
 			
 			public void handleMessage(String message) {
 				try {
-					assertEquals(message, "{\r\n" + 
+					String expected = "{\r\n" + 
 							"  \"error\" : {\r\n" + 
 							"    \"code\" : 100,\r\n" + 
 							"    \"message\" : \"consumer already part of the queue and this connection should be rejected\"\r\n" + 
 							"  }\r\n" + 
-							"}");
+							"}";
+					assertEquals(JSON.parse(message), JSON.parse(expected));
 					logger.info("Display messages of duplicate  consumer ID :"+ message + " Successfully");
 					messageReceived=true;
 					logger.log(Status.PASS, MarkupHelper.createLabel("Test_DuplicateConsumerID ", ExtentColor.GREEN));
@@ -214,7 +215,7 @@ public class OrderLogBackTest extends Base {
 				}
 			}
 		});
-		
+		Log.info("Wait for error message to be received.");
 		Thread.sleep(1000);
 		assertEquals(messageReceived,true);
 		}catch (Exception e) {
