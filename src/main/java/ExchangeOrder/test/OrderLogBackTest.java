@@ -28,8 +28,6 @@ public class OrderLogBackTest extends Base {
 			Log.error(e.getMessage());
 			throw (e);
 		}
-		
-		
 	}
 
 	@Test

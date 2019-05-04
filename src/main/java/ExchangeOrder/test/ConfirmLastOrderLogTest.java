@@ -1,6 +1,10 @@
 package ExchangeOrder.test;
 
 
+import static org.testng.Assert.assertEquals;
+
+import java.util.Iterator;
+
 import org.testng.ITestResult;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.AfterTest;
@@ -10,7 +14,9 @@ import com.aventstack.extentreports.Status;
 import com.aventstack.extentreports.markuputils.ExtentColor;
 import com.aventstack.extentreports.markuputils.MarkupHelper;
 
+import ExchangeOrder.model.OrderLogBack;
 import ExchangeOrder.utility.Log;
+import ExchangeOrder.utility.WsClient;
 
 public class ConfirmLastOrderLogTest extends Base {
 	// Getting the Test Case name, as it will going to use in so many places
@@ -22,6 +28,18 @@ public class ConfirmLastOrderLogTest extends Base {
 		Log.info("-------Start TestCase" + sTestCaseName + "----------");
 		logger = extent.createTest("Test_SingleConfirmLastOrderLogTest");
 		logger.log(Status.PASS, MarkupHelper.createLabel("Test_SingleConfirmLastOrderLogTest ", ExtentColor.GREEN));
+		WsClient.connectToSocket("xchange/orderstreaming/orderlogback?memberId=A&consumerId=testConsumer&lastOrderLogId=");
+		
+		//wait for orders to load
+		Thread.sleep(2000);
+		
+		Iterator<OrderLogBack> itr = WsClient.logs.iterator();
+		OrderLogBack olb;
+		assertEquals(WsClient.logs.size(), 28);
+		while(itr.hasNext()) {
+			olb = itr.next();
+			Log.info("OLB : "+olb);
+		}
 		Log.info("Test_SingleConfirmLastOrderLogTest() : PASS");
 		}catch (Exception e) {
 			logger.log(Status.FAIL, MarkupHelper.createLabel("Test_SingleConfirmLastOrderLogTest", ExtentColor.RED));
