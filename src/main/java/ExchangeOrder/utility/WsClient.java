@@ -40,6 +40,7 @@ public class WsClient {
 
     @OnClose
     public void onClose(Session userSession, CloseReason reason) {
+    	Log.info("Session Close"+reason);
         this.userSession = null;
     }
 
