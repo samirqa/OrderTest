@@ -1,7 +1,6 @@
 package ExchangeOrder.test;
 
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -13,6 +12,7 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.Test;
 
+import com.alibaba.fastjson.JSON;
 import com.aventstack.extentreports.Status;
 import com.aventstack.extentreports.markuputils.ExtentColor;
 import com.aventstack.extentreports.markuputils.MarkupHelper;
@@ -20,7 +20,6 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sun.media.jfxmedia.logging.Logger;
 
 import ExchangeOrder.model.LogResult;
 import ExchangeOrder.model.OrderLogBack;
@@ -41,15 +40,15 @@ public class OrderLogBackTest extends Base {
 		try {
 			Log.info("-------Start TestCase" + sTestCaseName + "----------");
 			logger = extent.createTest("Test_EmptyAllInput");
-			WsClient cl = new WsClient("xchange/orderstreaming/orderlogback?memberId=&consumerId=&lastOrderLogId=");
+			WsClient cl = new WsClient("xchange/orderstreaming/orderlogback?consumerId=&memberId=&lastOrderLogId=");
 			cl.addMessageHandler(new MessageHandler() {
 
 				public void handleMessage(String message) {
 					try {
-						assertEquals(message, "{\r\n" + "  \"error\" : {\r\n" + "    \"code\" : 100,\r\n"
-								+ "    \"message\" : \"MemberID must be a non empty value!!\"\r\n" + "  }\r\n" + "}");
-						logger.info("Display error message of Empty member ID is :" + message + " Successfully");
-						messageReceived = true;
+						String expected = "{\"error\":{\"code\":100,\"message\":\"ConsumerId must be a non empty value!!\"}}";
+						assertEquals(JSON.parse(message), JSON.parse(expected));
+						logger.info("Display error message of Empty member ID is :"+message+ " Successfully");
+						messageReceived=true;
 						logger.log(Status.PASS, MarkupHelper.createLabel("Test_EmptyAllInput", ExtentColor.GREEN));
 
 					} catch (Exception e) {
@@ -57,7 +56,7 @@ public class OrderLogBackTest extends Base {
 					}
 				}
 			});
-
+			cl.connect();
 			Thread.sleep(1000);
 			assertEquals(messageReceived, true);
 		} catch (Exception e) {
@@ -78,10 +77,15 @@ public class OrderLogBackTest extends Base {
 
 				public void handleMessage(String message) {
 					try {
-						assertEquals(message, "{\r\n" + "  \"error\" : {\r\n" + "    \"code\" : 100,\r\n"
-								+ "    \"message\" : \"Member id is not Valid and this connection should be rejected\"\r\n"
-								+ "  }\r\n" + "}");
-						logger.info("Display error message of Invalid member ID is :" + message + " Successfully");
+						String expected = "{\r\n" + 
+								"  \"error\" : {\r\n" + 
+								"    \"code\" : 100,\r\n" + 
+								"    \"message\" : \"Member id is not Valid and this connection should be rejected\"\r\n" + 
+								"  }\r\n" + 
+								"}";
+								
+						assertEquals(JSON.parse(message), JSON.parse(expected));
+						logger.info("Display error message of Invalid member ID is :"+message+ " Successfully");
 						messageReceived = true;
 						logger.log(Status.PASS, MarkupHelper.createLabel("Test_InvalidMemberID ", ExtentColor.GREEN));
 
@@ -90,7 +94,7 @@ public class OrderLogBackTest extends Base {
 					}
 				}
 			});
-
+			cl.connect();
 			Thread.sleep(1000);
 			assertEquals(messageReceived, true);
 		} catch (Exception e) {
@@ -110,10 +114,15 @@ public class OrderLogBackTest extends Base {
 
 				public void handleMessage(String message) {
 					try {
-						assertEquals(message, "{\r\n" + "  \"error\" : {\r\n" + "    \"code\" : 100,\r\n"
-								+ "    \"message\" : \"ConsumerId must be a non empty value!!\"\r\n" + "  }\r\n" + "}");
-						messageReceived = true;
-						logger.info("Display error message of Empty Conlumer ID is :" + message + " Successfully");
+						String expected = "{\r\n" + 
+								"  \"error\" : {\r\n" + 
+								"    \"code\" : 100,\r\n" + 
+								"    \"message\" : \"ConsumerId must be a non empty value!!\"\r\n" + 
+								"  }\r\n" + 
+								"}";
+						assertEquals(JSON.parse(message), JSON.parse(expected));
+						messageReceived=true;
+						logger.info("Display error message of Empty Conlumer ID is :"+message+ " Successfully");
 						logger.log(Status.PASS, MarkupHelper.createLabel("Test_EmptyConsumerID ", ExtentColor.GREEN));
 
 					} catch (Exception e) {
@@ -121,7 +130,8 @@ public class OrderLogBackTest extends Base {
 					}
 				}
 			});
-
+			cl.connect();
+			Log.info("Wait for error message to be received.");
 			Thread.sleep(1000);
 			assertEquals(messageReceived, true);
 		} catch (Exception e) {
@@ -145,7 +155,8 @@ public class OrderLogBackTest extends Base {
 
 				public void handleMessage(String message) {
 					try {
-						LogResult result = mapper.readValue(message, LogResult.class);
+						LogResult<OrderLogBack> result = mapper.readValue(message, new TypeReference<LogResult<OrderLogBack>>() {
+						});
 						logger.info("Display All messages of valid data :" + message + " Successfully");
 						olbList.add(result.getResult());
 					} catch (Exception e) {
@@ -153,6 +164,7 @@ public class OrderLogBackTest extends Base {
 					}
 				}
 			});
+			cl.connect();
 			// wait for orders to load
 			Thread.sleep(2000);
 
@@ -178,7 +190,8 @@ public class OrderLogBackTest extends Base {
 
 				public void handleMessage(String message) {
 					try {
-						LogResult result = mapper.readValue(message, LogResult.class);
+						LogResult<OrderLogBack> result = mapper.readValue(message, new TypeReference<LogResult<OrderLogBack>>() {
+						});
 						logger.log(Status.INFO, message);
 						Log.info(message);
 						System.out.println(message);
@@ -188,28 +201,30 @@ public class OrderLogBackTest extends Base {
 					}
 				}
 			});
-
-			WsClient cl1 = new WsClient(
-					"xchange/orderstreaming/orderlogback?memberId=A&consumerId=TestConsumer1&lastOrderLogId=_");
-			cl1.addMessageHandler(new MessageHandler() {
-
-				public void handleMessage(String message) {
-					try {
-						assertEquals(message, "{\r\n" + "  \"error\" : {\r\n" + "    \"code\" : 100,\r\n"
-								+ "    \"message\" : \"consumer already part of the queue and this connection should be rejected\"\r\n"
-								+ "  }\r\n" + "}");
-						logger.info("Display messages of duplicate  consumer ID :" + message + " Successfully");
-						messageReceived = true;
-						logger.log(Status.PASS,
-								MarkupHelper.createLabel("Test_DuplicateConsumerID ", ExtentColor.GREEN));
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
+		
+		WsClient cl1 = new WsClient("xchange/orderstreaming/orderlogback?memberId=A&consumerId=TestConsumer1&lastOrderLogId=_");
+		cl1.addMessageHandler(new MessageHandler() {
+			
+			public void handleMessage(String message) {
+				try {
+					String expected = "{\r\n" + 
+							"  \"error\" : {\r\n" + 
+							"    \"code\" : 100,\r\n" + 
+							"    \"message\" : \"consumer already part of the queue and this connection should be rejected\"\r\n" + 
+							"  }\r\n" + 
+							"}";
+					assertEquals(JSON.parse(message), JSON.parse(expected));
+					logger.info("Display messages of duplicate  consumer ID :"+ message + " Successfully");
+					messageReceived=true;
+					logger.log(Status.PASS, MarkupHelper.createLabel("Test_DuplicateConsumerID ", ExtentColor.GREEN));
+				}catch (Exception e) {
+					e.printStackTrace();
 				}
-			});
+			}
+		});
 
-			Thread.sleep(1000);
-			assertEquals(messageReceived, true);
+		Thread.sleep(1000);
+		assertEquals(messageReceived, true);
 		} catch (Exception e) {
 			logger.log(Status.FAIL, MarkupHelper.createLabel("Test_DuplicateConsumerID", ExtentColor.RED));
 		}
@@ -226,7 +241,8 @@ public class OrderLogBackTest extends Base {
 
 				public void handleMessage(String message) {
 					try {
-						LogResult result = mapper.readValue(message, LogResult.class);
+						LogResult<OrderLogBack> result = mapper.readValue(message, new TypeReference<LogResult<OrderLogBack>>() {
+						});
 						olbList.add(result.getResult());
 						logger.info("Display Output :" + message);
 					} catch (Exception e) {
@@ -234,6 +250,7 @@ public class OrderLogBackTest extends Base {
 					}
 				}
 			});
+			cl.connect();
 			// wait for orders to load
 			Thread.sleep(2000);
 
@@ -258,7 +275,8 @@ public class OrderLogBackTest extends Base {
 
 					public void handleMessage(String message) {
 						try {
-							LogResult result = mapper.readValue(message, LogResult.class);
+							LogResult<OrderLogBack> result = mapper.readValue(message, new TypeReference<LogResult<OrderLogBack>>() {
+							});
 							logger.info("Display All messages after lastOrderLogId=10 :" + message + " Successfully");
 							olbList.add(result.getResult());
 							
@@ -290,7 +308,8 @@ public class OrderLogBackTest extends Base {
 
 							public void handleMessage(String message) {
 								try {
-									LogResult result = mapper.readValue(message, LogResult.class);
+									LogResult<OrderLogBack> result = mapper.readValue(message, new TypeReference<LogResult<OrderLogBack>>() {
+									});
 									olbList.add(result.getResult());
 									logger.info("Display All messages after lastOrderLogId=29 :" + message + " Successfully");
 									logger.info("Total size of LogBack :"+olbList.size());

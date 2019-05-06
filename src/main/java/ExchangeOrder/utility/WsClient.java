@@ -18,8 +18,13 @@ public class WsClient {
     Session userSession = null;
     private MessageHandler messageHandler;
     private static String endpointURI = ApplicationProperties.getInstance().getProperty("server.endpoint");
+    private String query;
 
     public WsClient(String query) {
+    	this.query = query;
+    }
+    
+    public void connect() {
         try {
             WebSocketContainer container = ContainerProvider
                     .getWebSocketContainer();
@@ -27,10 +32,18 @@ public class WsClient {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+
     }
     
     public void close() throws IOException {
-    	userSession.close();
+    	try {
+    		if(userSession!=null) {
+    	    	userSession.close();    			
+    		}
+    	}catch (Exception e) {
+			// TODO: handle exception
+    		e.printStackTrace();
+		}
     }
 
     @OnOpen
