@@ -1,13 +1,13 @@
 package ExchangeOrder.model;
 
-public class LogResult {
-	private OrderLogBack result;
+public class LogResult<T> {
+	private T result;
 
-	public OrderLogBack getResult() {
+	public T getResult() {
 		return result;
 	}
 
-	public void setResult(OrderLogBack result) {
+	public void setResult(T result) {
 		this.result = result;
 	}
 	
