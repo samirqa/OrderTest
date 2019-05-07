@@ -267,6 +267,7 @@ public class OrderLogBackTest extends Base {
 	// Step 8 - valid memberid, Unique consumerId, and empty orderLogbackid
 		@Test(priority = 7)
 		public void Test_RecordFromGivenLastOrderID() throws Exception {
+			olbList = new ArrayList<OrderLogBack>();
 			try {
 				Log.info("-------Start TestCase" + sTestCaseName + "----------");
 				logger = extent.createTest("Test_RecordFromGivenLastOrderID");
@@ -286,6 +287,7 @@ public class OrderLogBackTest extends Base {
 					}
 				});
 				// wait for orders to load
+				cl.connect();
 				Thread.sleep(2000);
 
 				assertEquals(olbList.size(),18);
