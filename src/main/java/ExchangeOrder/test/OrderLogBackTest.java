@@ -306,7 +306,6 @@ public class OrderLogBackTest extends Base {
 				// wait for orders to load
 				cl.connect();
 				Thread.sleep(4000);
-			
 				assertEquals(olbList.size(),18);
 				logger.info("Matched all display data count :" + olbList.size() + "Successfully");
 				//assertEquals(olbList, loadExpectedResults());
