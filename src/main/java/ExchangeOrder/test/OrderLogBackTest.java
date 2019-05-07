@@ -37,6 +37,7 @@ public class OrderLogBackTest extends Base {
 	// Step 2 - pass all parameter empty
 	@Test(priority = 1)
 	public void Test_EmptyAllInput() throws Exception {
+		olbList = new ArrayList<OrderLogBack>();
 		try {
 			Log.info("-------Start TestCase" + sTestCaseName + "----------");
 			logger = extent.createTest("Test_EmptyAllInput");
@@ -58,9 +59,11 @@ public class OrderLogBackTest extends Base {
 			});
 			cl.connect();
 			Thread.sleep(1000);
+			cl.close();
 			assertEquals(messageReceived, true);
 		} catch (Exception e) {
 			logger.log(Status.FAIL, MarkupHelper.createLabel("Test_EmptyAllInput", ExtentColor.RED));
+			throw e;
 		}
 
 	}
@@ -68,6 +71,7 @@ public class OrderLogBackTest extends Base {
 	// Step 3 - invalid memberid and valid consumer with valid lastLogid
 	@Test(priority = 2)
 	public void Test_InvalidMemberID() throws Exception {
+		olbList = new ArrayList<OrderLogBack>();
 		try {
 			Log.info("-------Start TestCase" + sTestCaseName + "----------");
 			logger = extent.createTest("Test_InvalidMemberID");
@@ -96,9 +100,11 @@ public class OrderLogBackTest extends Base {
 			});
 			cl.connect();
 			Thread.sleep(1000);
+			cl.close();
 			assertEquals(messageReceived, true);
 		} catch (Exception e) {
 			logger.log(Status.FAIL, MarkupHelper.createLabel("Test_InvalidMemberID", ExtentColor.RED));
+			throw e;
 		}
 
 	}
@@ -106,6 +112,7 @@ public class OrderLogBackTest extends Base {
 	// Step 4 - valid memberid, empty consumerId, and empty orderLogbackid
 	@Test(priority = 3)
 	public void Test_EmptyConsumerID() throws Exception {
+		olbList = new ArrayList<OrderLogBack>();
 		try {
 			Log.info("-------Start TestCase" + sTestCaseName + "----------");
 			logger = extent.createTest("Test_EmptyConsumerID");
@@ -133,9 +140,11 @@ public class OrderLogBackTest extends Base {
 			cl.connect();
 			Log.info("Wait for error message to be received.");
 			Thread.sleep(1000);
+			cl.close();
 			assertEquals(messageReceived, true);
 		} catch (Exception e) {
 			logger.log(Status.FAIL, MarkupHelper.createLabel("Test_EmptyConsumerID", ExtentColor.RED));
+			throw e;
 		}
 
 	}
@@ -143,6 +152,7 @@ public class OrderLogBackTest extends Base {
 	// Step 5. Provid valid data, with blank ordlerLogId
 	@Test(priority = 4)
 	public void Test_ValidData() throws Exception {
+		olbList = new ArrayList<OrderLogBack>();
 		try {
 			Log.info("-------Start TestCase" + sTestCaseName + "----------");
 			logger = extent.createTest("Test_ValidData");
@@ -167,7 +177,6 @@ public class OrderLogBackTest extends Base {
 			cl.connect();
 			// wait for orders to load
 			Thread.sleep(2000);
-
 			assertEquals(olbList.size(), 28);
 			logger.info("Matched all display data count :" + olbList.size() + "Successfully");
 			//assertEquals(olbList, loadExpectedResults());
@@ -175,12 +184,14 @@ public class OrderLogBackTest extends Base {
 			logger.log(Status.PASS, MarkupHelper.createLabel("Test_ValidData ", ExtentColor.GREEN));
 		} catch (Exception e) {
 			logger.log(Status.FAIL, MarkupHelper.createLabel("Test_ValidData", ExtentColor.RED));
+			throw e;
 		}
 	}
 
 	// Step 6. Provider valid memberid and duplicate consumer
 	@Test(priority = 5)
 	public void Test_DuplicateConsumerID() throws Exception {
+		olbList = new ArrayList<OrderLogBack>();
 		try {
 			Log.info("-------Start TestCase" + sTestCaseName + "----------");
 			logger = extent.createTest("Test_DuplicateConsumerID");
@@ -201,7 +212,7 @@ public class OrderLogBackTest extends Base {
 					}
 				}
 			});
-		
+		cl.connect();	
 		WsClient cl1 = new WsClient("xchange/orderstreaming/orderlogback?memberId=A&consumerId=TestConsumer1&lastOrderLogId=_");
 		cl1.addMessageHandler(new MessageHandler() {
 			
@@ -222,17 +233,21 @@ public class OrderLogBackTest extends Base {
 				}
 			}
 		});
-
+		cl1.connect();
 		Thread.sleep(1000);
 		assertEquals(messageReceived, true);
+		cl1.close();
+		cl.close();
 		} catch (Exception e) {
 			logger.log(Status.FAIL, MarkupHelper.createLabel("Test_DuplicateConsumerID", ExtentColor.RED));
+			throw e;
 		}
 	}
 
 	// Step 7 - valid memberid, Unique consumerId, and empty orderLogbackid
 	@Test(priority = 6)
 	public void Test_EmptyLogBackID() throws Exception {
+		olbList = new ArrayList<OrderLogBack>();
 		try {
 			Log.info("-------Start TestCase" + sTestCaseName + "----------");
 			logger = extent.createTest("Test_EmptyLogBackID");
@@ -261,6 +276,7 @@ public class OrderLogBackTest extends Base {
 			logger.log(Status.PASS, MarkupHelper.createLabel("Test_EmptyLogBackID ", ExtentColor.GREEN));
 		} catch (Exception e) {
 			logger.log(Status.FAIL, MarkupHelper.createLabel("Test_EmptyLogBackID", ExtentColor.RED));
+			throw e;
 		}
 	}
 	
@@ -279,6 +295,7 @@ public class OrderLogBackTest extends Base {
 							LogResult<OrderLogBack> result = mapper.readValue(message, new TypeReference<LogResult<OrderLogBack>>() {
 							});
 							logger.info("Display All messages after lastOrderLogId=10 :" + message + " Successfully");
+							System.out.println(message);
 							olbList.add(result.getResult());
 							
 						} catch (Exception e) {
@@ -288,20 +305,22 @@ public class OrderLogBackTest extends Base {
 				});
 				// wait for orders to load
 				cl.connect();
-				Thread.sleep(2000);
-
+				Thread.sleep(4000);
 				assertEquals(olbList.size(),18);
 				logger.info("Matched all display data count :" + olbList.size() + "Successfully");
 				//assertEquals(olbList, loadExpectedResults());
 				cl.close();
 				logger.log(Status.PASS, MarkupHelper.createLabel("Test_RecordFromGivenLastOrderID ", ExtentColor.GREEN));
 			} catch (Exception e) {
+				e.printStackTrace();
 				logger.log(Status.FAIL, MarkupHelper.createLabel("Test_RecordFromGivenLastOrderID", ExtentColor.RED));
+				throw e;
 			}
 		}
 		// Step 9 - valid memberid, Unique consumerId, and empty orderLogbackid
 				@Test(priority = 8)
 				public void Test_OutofRangeLastOrderID() throws Exception {
+					olbList = new ArrayList<OrderLogBack>();
 					try {
 						Log.info("-------Start TestCase" + sTestCaseName + "----------");
 						logger = extent.createTest("Test_OutofRangeLastOrderID");
@@ -321,7 +340,7 @@ public class OrderLogBackTest extends Base {
 							}
 						});
 						// wait for orders to load
-
+						cl.connect();
 						Thread.sleep(2000);
 						assertEquals(olbList.size(),0);
 						logger.info("Records featched after lastOrderLogId = 29 are Zero ");
@@ -330,6 +349,7 @@ public class OrderLogBackTest extends Base {
 						logger.log(Status.PASS, MarkupHelper.createLabel("Test_OutofRangeLastOrderID ", ExtentColor.GREEN));
 					} catch (Exception e) {
 						logger.log(Status.FAIL, MarkupHelper.createLabel("Test_OutofRangeLastOrderID", ExtentColor.RED));
+						throw e;
 					}
 				}
 	private List<OrderLogBack> loadExpectedResults() throws JsonParseException, JsonMappingException, IOException {
