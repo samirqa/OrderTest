@@ -3,7 +3,7 @@ package ExchangeOrder.utility;
 public class Constant {
 	public static final String Path_Report = "/TestResources/TestReports/";
 
-    public static String KAFKA_BROKERS = ApplicationProperties.getInstance().getProperty("localhost:9092");
+    public static String KAFKA_BROKERS = ApplicationProperties.getInstance().getProperty("kafka.brockers");
 
     public static String TOPIC_NAME=ApplicationProperties.getInstance().getProperty("kafka.publisher.topic");
 
