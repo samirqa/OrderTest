@@ -20,7 +20,6 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
-import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
 import com.alibaba.fastjson.JSON;
@@ -32,7 +31,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sun.media.jfxmedia.logging.Logger;
 
 import ExchangeOrder.model.LogResult;
 import ExchangeOrder.model.OrderFilledLog;
@@ -75,7 +73,7 @@ public class OrderFillTest extends Base {
 		olbFiledList = new ArrayList<OrderFilledLog>();
 	}
 
-	// Step 2 - pass all parameter empty
+	// Step 2 - pass all the parameter empty and verify error message
 	@Test(priority = 1)
 	public void Test_EmptyAllOrderFillInput() throws Exception {
 		// olbList = new ArrayList<OrderLogBack>();
@@ -215,127 +213,129 @@ public class OrderFillTest extends Base {
 		}
 
 	}
-	// Step 6 - Enter Invalid TestData and Verify Logs display 
-	@Test(dataProvider = "InvalidTestData", priority = 5)
+
+	// Step 6 - Enter currentLogbackId greater than Kafla start id and verify error
+	// message
+	@Test(dataProvider = "InvalidTestData", priority = 5) //enabled = false)
 	private void Test_InvalidTestData(final String currentLogbackId, final int kafkastartid) throws Exception {
-		//olbList = new ArrayList<OrderLogBack>();
-		//olbFiledList = new ArrayList<OrderFilledLog>();
+		// olbList = new ArrayList<OrderLogBack>();
+		// olbFiledList = new ArrayList<OrderFilledLog>();
 		try {
 			Log.info("-------Start TestCase" + sTestCaseName + "----------");
 			logger = extent.createTest("Test_InvalidTestData");
-			cl_orderlogback = new WsClient("xchange/orderstreaming/orderlogback?memberId=A&consumerId=TestConsumer&lastOrderLogId="+currentLogbackId);
-			cl_filledOrderLog = new WsClient("xchange/orderstreaming/orderfilled?lastOrderLogId="+currentLogbackId+"&symbol=BTCUSDT");
+			cl_orderlogback = new WsClient(
+					"xchange/orderstreaming/orderlogback?memberId=A&consumerId=TestConsumer&lastOrderLogId="
+							+ currentLogbackId);
+			cl_filledOrderLog = new WsClient(
+					"xchange/orderstreaming/orderfilled?lastOrderLogId=" + currentLogbackId + "&symbol=BTCUSDT");
 			cl_orderlogback.addMessageHandler(new MessageHandler() {
-				
+
 				public void handleMessage(String message) {
 					try {
-					String expected = "{\n" + 
-							"  \"error\" : {\n" + 
-							"    \"code\" : 100,\n" + 
-							"    \"message\" : \"Log id supplied: "+currentLogbackId+" Cached logId: "+kafkastartid+" less than what the user is requesting for\"\n" + 
-							"  }\n" + 
-							"}";
-					assertEquals(JSON.parse(message), JSON.parse(expected));
-					logger.info("Display error message for Invalid TestData is :" + message + " Successfully");
-					messageReceived = true;
-					cl_orderlogback.close();
-					logger.log(Status.PASS,
-							MarkupHelper.createLabel("Test_InvalidTestData", ExtentColor.GREEN));
-					synchronized (monitor) {
-						monitor.notifyAll();								
+						String expected = "{\n" + "  \"error\" : {\n" + "    \"code\" : 100,\n"
+								+ "    \"message\" : \"Log id supplied: " + currentLogbackId + " Cached logId: "
+								+ kafkastartid + " less than what the user is requesting for\"\n" + "  }\n" + "}";
+						assertEquals(JSON.parse(message), JSON.parse(expected));
+						logger.info("Display error message for Invalid TestData is :" + message + " Successfully");
+						messageReceived = true;
+						cl_orderlogback.close();
+						logger.log(Status.PASS, MarkupHelper.createLabel("Test_InvalidTestData", ExtentColor.GREEN));
+						synchronized (monitor) {
+							monitor.notifyAll();
 						}
-					}catch (Exception e) {
+					} catch (Exception e) {
 						e.printStackTrace();
 					}
 				}
 			});
-			
+
 			cl_filledOrderLog.addMessageHandler(new MessageHandler() {
-				
+
 				public void handleMessage(String message) {
 					try {
-					String expected = "{\n" + 
-							"  \"error\" : {\n" + 
-							"    \"code\" : 100,\n" + 
-							"    \"message\" : \"Log id supplied: "+currentLogbackId+" Cached logId: "+kafkastartid+" less than what the user is requesting for\"\n" + 
-							"  }\n" + 
-							"}";
-					assertEquals(JSON.parse(message), JSON.parse(expected));
-					logger.info("Display error message Invalid TestData is :" + message + " Successfully");
-					messageReceived = true;
-					
+						String expected = "{\n" + "  \"error\" : {\n" + "    \"code\" : 100,\n"
+								+ "    \"message\" : \"Log id supplied: " + currentLogbackId + " Cached logId: "
+								+ kafkastartid + " less than what the user is requesting for\"\n" + "  }\n" + "}";
+						assertEquals(JSON.parse(message), JSON.parse(expected));
+						logger.info("Display error message Invalid TestData is :" + message + " Successfully");
+						messageReceived = true;
+
 						cl_orderlogback.close();
-						logger.log(Status.PASS,
-								MarkupHelper.createLabel("Test_InvalidTestData", ExtentColor.GREEN));
+						logger.log(Status.PASS, MarkupHelper.createLabel("Test_InvalidTestData", ExtentColor.GREEN));
 						synchronized (monitor) {
-							monitor.notifyAll();								
+							monitor.notifyAll();
 						}
-					}catch (Exception e) {
+					} catch (Exception e) {
 						e.printStackTrace();
 					}
 				}
 			});
 			MyKafkaProducer.produceMessage(getOLB(kafkastartid));
-			
+
 			cl_filledOrderLog.connect();
 			cl_orderlogback.connect();
-			
+
 			try {
-			synchronized (monitor) {
-				monitor.wait();
-			}
-			}catch (IllegalMonitorStateException e) {
+				synchronized (monitor) {
+					monitor.wait();
+				}
+			} catch (IllegalMonitorStateException e) {
 				// TODO: handle exception
 				e.printStackTrace();
 			}
 			System.out.println("Reached first wait");
 			try {
-			synchronized (monitor) {
-				monitor.wait();
-			}
-			}catch (IllegalMonitorStateException e) {
+				synchronized (monitor) {
+					monitor.wait();
+				}
+			} catch (IllegalMonitorStateException e) {
 				// TODO: handle exception
 				e.printStackTrace();
 			}
 			assertEquals(messageReceived, true);
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			// TODO: handle exception
 			logger.log(Status.FAIL, MarkupHelper.createLabel("Test_InvalidTestData", ExtentColor.RED));
 			throw e;
 		}
 	}
-	// Step 7 - Enter valid Symbol and Verify Logs display (ex. BTCUSDT)
-	@Test(dataProvider = "TestDataForBoundrycase", priority = 6)
+
+	@DataProvider(name = "InvalidTestData")
+	public Object[][] getInvalidDataFromDataprovider() {
+		return new Object[][] {
+				 { "26", 25 },
+				 };
+	}
+
+	// Step 7 - Enter currentLogbackId, Kafka Start ID and match the result with
+	// Expected OrderLogBack and OrderFillLog count
+	@Test(dataProvider = "TestValidData", priority = 6) // enabled = false)
 
 	public void Test_ValidInput_And_ValidSymbol(String currentLogbackId, final int kafkastartid,
 			final int expectedOlbMessages, final int expectedOFLmessages, String Symbol) throws Exception {
 		try {
 			Log.info("-------Start TestCase" + sTestCaseName + "----------");
-			logger = extent.createTest("Test_ValidInput_And_ValidSymbol from "+currentLogbackId +"&"+kafkastartid);
+			logger = extent.createTest("Test_ValidInput_And_ValidSymbol from " + currentLogbackId + "&" + kafkastartid);
 			String logbackUrl = "xchange/orderstreaming/orderlogback?memberId=A&consumerId=TestConsumer&lastOrderLogId="
 					+ currentLogbackId;
 			String orderFilledUrl = "xchange/orderstreaming/orderfilled?lastOrderLogId=" + currentLogbackId + "&symbol="
 					+ Symbol;
 			System.out.println("Logback URL :" + logbackUrl);
 			logger.info("Logback URL : " + logbackUrl);
-			System.out.println("OrderFilled URL :" + orderFilledUrl);
 			logger.info("OrderFilled URL :" + orderFilledUrl);
 			cl_orderlogback = new WsClient(logbackUrl);
 			cl_filledOrderLog = new WsClient(orderFilledUrl);
-			
+
 			cl_orderlogback.addMessageHandler(new MessageHandler() {
 				public void handleMessage(String message) {
 					LogResult<OrderLogBack> result;
 					try {
 						result = mapper.readValue(message, new TypeReference<LogResult<OrderLogBack>>() {
 						});
-						//System.out.println("ORDERLOGBACK =" + result.getResult());
 						logger.info("ORDERLOGBACK =	" + result.getResult());
 						olbList.add(result.getResult());
 						olb_messageCount++;
 						if (olb_messageCount >= expectedOlbMessages) {
-							//System.out.println(result.getResult());
 							logger.info("ORDERLOGBACK" + result.getResult());
 							try {
 								cl_orderlogback.close();
@@ -366,7 +366,6 @@ public class OrderFillTest extends Base {
 					try {
 						result = mapper.readValue(message, new TypeReference<LogResult<OrderFilledLog>>() {
 						});
-						//System.out.println("ORDERFILLEDLOG =" + result.getResult());
 						logger.info("ORDERFILLEDLOG" + result.getResult());
 						olbFiledList.add(result.getResult());
 						ofl_messageCount++;
@@ -405,7 +404,6 @@ public class OrderFillTest extends Base {
 					// TODO Auto-generated method stub
 					for (int i = kafkastartid + 1; i <= kafkastartid + 99; i++) {
 						try {
-							System.out.println("Producing logid " + i);
 							logger.info("Producing logid : " + i);
 							MyKafkaProducer.produceMessage(getOLB(i));
 						} catch (JsonProcessingException e) {
@@ -479,20 +477,12 @@ public class OrderFillTest extends Base {
 	 * @return
 	 **/
 
-	@DataProvider(name = "TestDataForBoundrycase")
+	@DataProvider(name = "TestValidData")
 	public Object[][] getDataFromDataprovider() {
-		return new Object[][] {
-			{ "20", 25, 105, 102, "BTCUSDT" },
-		//	{ "_", 25, 99, 99, "BTCUSDT" },
-		//	{ "3500", 3600, 200, 200, "BTCUSDT" }, 
-			};
-	}
-	@DataProvider(name = "InvalidTestData")
-	public Object[][] getInvalidDataFromDataprovider() {
-		return new Object[][] {
-			//{ "26", 25 },
-			{ "30",30},
-			};
+		return new Object[][] { { "20", 25, 105, 102, "BTCUSDT" },
+				// { "_", 25, 99, 99, "BTCUSDT" },
+				// { "3500", 3600, 200, 200, "BTCUSDT" },
+		};
 	}
 
 	private List<OrderLogBack> loadExpectedResults() throws JsonParseException, JsonMappingException, IOException {

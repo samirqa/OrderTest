@@ -1,6 +1,8 @@
 package ExchangeOrder.test;
 
+import java.awt.Desktop;
 import java.io.File;
+import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -8,6 +10,7 @@ import java.util.Date;
 import org.apache.log4j.Logger;
 import org.apache.log4j.xml.DOMConfigurator;
 import org.testng.annotations.AfterClass;
+import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeClass;
 
 import com.aventstack.extentreports.ExtentReports;
@@ -25,27 +28,25 @@ public class Base {
 	public static ExtentReports extent;
 	public static ExtentTest logger;
 	public static final Logger log4j = Logger.getLogger(Base.class);
-	
+	public String reportPath;
 	@BeforeClass
 	//@Parameters(value={"browser"})
-	//public void _beforeTest(String browser) {
 		public void _beforeTest() {
 		try{
 		DateFormat df = new SimpleDateFormat("dd.MM.yy-hhmmss");
-		File f = new File(ApplicationProperties.getInstance().getProperty("report.dir") + Constant.Path_Report);
+		File f = new File(System.getProperty("user.dir") + Constant.Path_Report);
+		System.out.println("File path : "+f);
 		if(!f.exists())
 			f.mkdirs();
-		
-		
-		htmlReporter = new ExtentHtmlReporter(ApplicationProperties.getInstance().getProperty("report.dir") + Constant.Path_Report + "OrderbacklogTest_" +df.format(new Date()) + ".html");
-	//	String envRootDir = System.getProperty("user.dir");
-	//	System.out.println("System Dir  " +envRootDir);
-	//	htmlReporter = new ExtentHtmlReporter("E:\\testreports\\TestResources\\TestReports\\OrderbacklogTest.html");
+		reportPath = f + "\\OrderbacklogTest_" +df.format(new Date()) + ".html";
+		System.out.println("Report path "+reportPath);
+		htmlReporter = new ExtentHtmlReporter(reportPath);
 		extent = new ExtentReports();
 		extent.attachReporter(htmlReporter);
 		extent.setSystemInfo("Host Name", "http://localhost:20003/chat.html");
 		extent.setSystemInfo("Environment", "Testing");
 		extent.setSystemInfo("Reporter Name", "Samir Patel");
+		extent.setSystemInfo("Report Name",reportPath);
 
 		htmlReporter.config().setDocumentTitle("Exchange Order Test Automation");
 		htmlReporter.config().setReportName("Test Execution Report");
@@ -62,10 +63,21 @@ public class Base {
 			e.printStackTrace();
 		}
 	}
-
+	@AfterTest
+	public void _tearDown() throws IOException {
+		String current = new java.io.File( "." ).getCanonicalPath();
+		System.out.println("Current path :"+current);
+		System.out.println(reportPath);
+		File f = new File(reportPath);
+		Desktop.getDesktop().open(f);
+	}
 	@AfterClass
 	public void _afterMethod() {
 		try {
+//			String current = new java.io.File( "." ).getCanonicalPath();
+//			System.out.println(reportPath);
+//			File f = new File(reportPath);
+//			Desktop.getDesktop().open(f);
 		} catch (Exception ignore) {
 
 		}
